@@ -14,7 +14,7 @@ on:
         type: string
         default: "13.3.0"
       cuda_docker_arch:
-        description: CUDA architectures to compile (empty = Dockerfile default)
+        description: Override CUDA architectures for both legs (empty = per-leg defaults)
         required: false
         type: string
         default: ""
@@ -34,10 +34,12 @@ jobs:
           - variant: cuda12
             dockerfile: .devops/cuda.Dockerfile
             cuda_version: ${{ inputs.cuda12_version }}
+            cuda_archs: 50-virtual;61-virtual;70-virtual;75-virtual;80-virtual;86-real;89-real;90-virtual;120a-real
             publish_latest: false
           - variant: cuda13
             dockerfile: .devops/cuda.Dockerfile
             cuda_version: ${{ inputs.cuda13_version }}
+            cuda_archs: 75-virtual;80-virtual;86-real;89-real;90-virtual;120a-real;121a-real
             publish_latest: true
     steps:
       - name: Check out the repository
@@ -107,7 +109,7 @@ jobs:
             IMAGE_URL=${{ github.server_url }}/${{ github.repository }}
             IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
             CUDA_VERSION=${{ matrix.cuda_version }}
-            ${{ inputs.cuda_docker_arch != '' && format('CUDA_DOCKER_ARCH={0}', inputs.cuda_docker_arch) || '' }}
+            CUDA_DOCKER_ARCH=${{ inputs.cuda_docker_arch || matrix.cuda_archs }}
           annotations: |
             manifest:org.opencontainers.image.created=${{ steps.build_date.outputs.date }}
             manifest:org.opencontainers.image.version=${{ steps.meta.outputs.build }}
