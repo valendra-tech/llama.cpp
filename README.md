@@ -43,6 +43,34 @@ A few options to get `llama.cpp` installed on your machine:
 - Download pre-built binaries from the [releases page](https://github.com/ggml-org/llama.cpp/releases)
 - Build from source by cloning this repository - check out [our build guide](docs/build.md)
 
+### Valendra CUDA server image (GHCR)
+
+Valendra publishes a CUDA `llama-server` image of this fork to
+`ghcr.io/valendra-tech/llama.cpp`. It includes the fork's Bonsai low-bit
+formats (e.g. `PTQ1_0` / `PQ2_0` ternary models).
+
+| Tag | CUDA | Notes |
+| --- | --- | --- |
+| `server-cuda12-b<build>` | 12.8.1 | Immutable |
+| `server-cuda13-b<build>` | 13.3.0 | Immutable |
+| `server-cuda12` | 12.8.1 | Mutable alias |
+| `server-cuda13` | 13.3.0 | Mutable alias |
+| `latest` | 13.3.0 | Mutable alias of `server-cuda13` |
+
+Images are `linux/amd64` only and expose `llama-server` on port 8080.
+
+```bash
+docker run --gpus all -p 8080:8080 \
+  -v /path/to/models:/models \
+  ghcr.io/valendra-tech/llama.cpp:server-cuda13 \
+  -m /models/Ternary-Bonsai-2-27B-PQ2_0.gguf -ngl 99
+```
+
+Builds are manual: run the `Publish GHCR server images` workflow
+(`workflow_dispatch`) from the Actions tab. It accepts optional CUDA version
+overrides and `cuda_docker_arch` to limit compiled architectures and speed up
+the build.
+
 Once installed:
 
 ```sh
